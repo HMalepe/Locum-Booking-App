@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '../../lib/auth';
-import { getUnreadCount, getPendingCounts } from '../../lib/queries';
+import { getUnreadCount, getPendingCounts, getPayments } from '../../lib/queries';
 import { logout } from '../../lib/actions';
 import BottomNav from '../../components/BottomNav';
 
@@ -14,6 +14,7 @@ export default function AppLayout({ children }) {
   const unread = getUnreadCount(user.id);
   const counts = getPendingCounts(user);
   const pending = user.role === 'locum' ? counts.requests : counts.applications;
+  const unpaid = user.role === 'manager' ? getPayments(user).filter((b) => !b.paid).length : 0;
 
   return (
     <>
@@ -27,7 +28,7 @@ export default function AppLayout({ children }) {
         </div>
       </header>
       <main className="container">{children}</main>
-      <BottomNav role={user.role} unread={unread} pending={pending} />
+      <BottomNav role={user.role} unread={unread} pending={pending} unpaid={unpaid} />
     </>
   );
 }

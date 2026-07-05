@@ -8,9 +8,11 @@ import {
   getUnreadCount,
   getCompletedBookings,
   getRatingSummary,
+  ensurePaymentNudges,
+  getPayments,
 } from '../../../lib/queries';
 import { respondToRequest } from '../../../lib/actions';
-import { fmtDate, fmtRate, typeLabel, jobTitleLabel, starString } from '../../../lib/format';
+import { fmtDate, fmtRate, typeLabel, jobTitleLabel, starString, daysUntil } from '../../../lib/format';
 import RateShifts from '../../../components/RateShifts';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +34,8 @@ function LocumDashboard({ user, upcoming, unread }) {
   const openShifts = getOpenShifts().filter((s) => s.locum_type === user.locum_type);
   const completed = getCompletedBookings(user);
   const myRating = getRatingSummary(user.id);
+  const owed = getPayments(user).filter((b) => !b.paid);
+  const owedTotal = owed.reduce((s, b) => s + (b.amount || 0), 0);
 
   return (
     <>
@@ -49,6 +53,23 @@ function LocumDashboard({ user, upcoming, unread }) {
         <div className="stat"><div className="n">{requests.length}</div><div className="l">Booking requests</div></div>
         <div className="stat"><div className="n">{unread}</div><div className="l">Unread messages</div></div>
       </div>
+
+      {owed.length > 0 && (
+        <div className="card" style={{ background: 'var(--warn-bg)', borderColor: '#f0d9ae', marginTop: '0.75rem' }}>
+          <div className="card-row">
+            <div>
+              <h3>💰 You&apos;re owed for {owed.length} shift{owed.length === 1 ? '' : 's'}</h3>
+              <div className="meta">
+                {owedTotal > 0 ? `≈ R ${owedTotal.toLocaleString()} outstanding · ` : ''}
+                {owed[0].pay_by ? <>Next expected: <strong>{fmtDate(owed[0].pay_by)}</strong></> : 'Payment dates depend on each pharmacy'}
+              </div>
+            </div>
+          </div>
+          <div className="btn-row" style={{ marginTop: '0.6rem' }}>
+            <Link href="/payments" className="btn small secondary">View payments</Link>
+          </div>
+        </div>
+      )}
 
       {requests.length > 0 && (
         <>
@@ -117,6 +138,7 @@ function ManagerDashboard({ user, upcoming, unread }) {
   const totalApplications = open.reduce((sum, s) => sum + s.pending_applications, 0);
   const completed = getCompletedBookings(user);
   const myRating = getRatingSummary(user.id);
+  const nudge = ensurePaymentNudges(user);
 
   return (
     <>
@@ -128,9 +150,12 @@ function ManagerDashboard({ user, upcoming, unread }) {
         )}
       </p>
 
+      {nudge.unpaidCount > 0 && <PaymentNudgeBanner nudge={nudge} cutoffDay={user.payment_cutoff_day} />}
+
       <div className="btn-row" style={{ margin: '0.75rem 0 1rem' }}>
         <Link href="/shifts/new" className="btn">+ Advertise a shift</Link>
         <Link href="/locums" className="btn secondary">Find a locum</Link>
+        <Link href="/settings" className="btn secondary">⚙️ Settings</Link>
       </div>
 
       <div className="stat-grid">
@@ -180,5 +205,50 @@ function ManagerDashboard({ user, upcoming, unread }) {
 
       <RateShifts bookings={completed} viewerRole="manager" />
     </>
+  );
+}
+
+// The weekly payment nudge. Re-issued every 7 days per unpaid shift until the
+// pharmacy's cutoff date; turns red once the cutoff has passed.
+function PaymentNudgeBanner({ nudge, cutoffDay }) {
+  const isOverdue = nudge.overdueCount > 0;
+  return (
+    <div
+      className="card"
+      style={{
+        background: isOverdue ? '#fdecea' : 'var(--warn-bg)',
+        borderColor: isOverdue ? '#f5c6c0' : '#f0d9ae',
+        marginTop: '0.75rem',
+      }}
+    >
+      <div className="card-row">
+        <div>
+          <h3>{isOverdue ? '🚨 Payments overdue!' : '🔔 Weekly payment reminder'}</h3>
+          <div className="meta">
+            {nudge.unpaidCount} unpaid shift{nudge.unpaidCount === 1 ? '' : 's'}
+            {nudge.totalDue > 0 ? ` · R ${nudge.totalDue.toLocaleString()} owed` : ''}
+            {nudge.notDoneCount > 0 ? ` · ${nudge.notDoneCount} still to confirm as done` : ''}
+          </div>
+          {isOverdue ? (
+            <div className="meta" style={{ color: 'var(--danger)', fontWeight: 600 }}>
+              {nudge.overdueCount} past your cutoff — pay your locums now.
+            </div>
+          ) : nudge.nextPayBy ? (
+            <div className="meta">
+              Pay by <strong>{fmtDate(nudge.nextPayBy)}</strong>
+              {daysUntil(nudge.nextPayBy) >= 0 && <> ({daysUntil(nudge.nextPayBy) === 0 ? 'today' : `${daysUntil(nudge.nextPayBy)} days left`})</>}
+              . This reminder repeats weekly until then.
+            </div>
+          ) : (
+            <div className="meta">
+              No cutoff date set — <Link href="/settings">set one in Settings</Link> so locums know when to expect payment.
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="btn-row" style={{ marginTop: '0.6rem' }}>
+        <Link href="/payments" className="btn small">Review & mark paid</Link>
+      </div>
+    </div>
   );
 }

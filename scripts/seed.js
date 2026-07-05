@@ -62,11 +62,15 @@ if (db.prepare('SELECT COUNT(*) AS n FROM shifts').get().n === 0) {
   insertShift.run(david, 'Clicks Rosebank', 'Rosebank', day(3), '10:00', '18:00', 'pharmacist', 240, 'Weekend cover needed. Friendly team.');
   insertShift.run(byNumber('DR-001'), 'Rosebank Family Practice', 'Rosebank', day(4), '08:30', '13:00', 'pharmacist', 260, 'Dispensing doctor practice — morning cover for our in-house dispensary.');
 
-  // A completed shift in the past with two-way ratings, so the review system has demo data
+  // A completed shift in the past with two-way ratings, so the review system has demo data.
+  // Marked done but NOT paid — demonstrates the weekly payment nudge.
   const past = db.prepare(`
-    INSERT INTO shifts (manager_id, pharmacy_name, city, shift_date, start_time, end_time, locum_type, rate, notes, status, assigned_locum_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'filled', ?)
+    INSERT INTO shifts (manager_id, pharmacy_name, city, shift_date, start_time, end_time, locum_type, rate, notes, status, assigned_locum_id, done, done_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'filled', ?, 1, datetime('now'))
   `).run(sarah, 'Dis-Chem Sandton City', 'Sandton', day(-5), '09:00', '17:00', 'pharmacist', 250, '', john);
+
+  // Sarah pays all her locums by the 25th of each month
+  db.prepare(`UPDATE users SET payment_cutoff_day = 25 WHERE id = ?`).run(sarah);
 
   const rate = db.prepare(`
     INSERT OR IGNORE INTO ratings (booking_kind, booking_id, rater_id, ratee_id, stars, comment)

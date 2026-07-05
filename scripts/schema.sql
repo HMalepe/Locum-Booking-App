@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   city TEXT,
   phone TEXT,
   job_title TEXT,
+  payment_cutoff_day INTEGER,
   bio TEXT DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -33,6 +34,10 @@ CREATE TABLE IF NOT EXISTS shifts (
   notes TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','filled','closed')),
   assigned_locum_id INTEGER REFERENCES users(id),
+  done INTEGER NOT NULL DEFAULT 0,
+  done_at TEXT,
+  paid INTEGER NOT NULL DEFAULT 0,
+  paid_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -57,6 +62,10 @@ CREATE TABLE IF NOT EXISTS booking_requests (
   rate REAL,
   notes TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','declined','cancelled')),
+  done INTEGER NOT NULL DEFAULT 0,
+  done_at TEXT,
+  paid INTEGER NOT NULL DEFAULT 0,
+  paid_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -88,6 +97,15 @@ CREATE TABLE IF NOT EXISTS ratings (
   UNIQUE (booking_kind, booking_id, rater_id)
 );
 
+CREATE TABLE IF NOT EXISTS payment_nudges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  manager_id INTEGER NOT NULL REFERENCES users(id),
+  booking_kind TEXT NOT NULL CHECK (booking_kind IN ('shift','request')),
+  booking_id INTEGER NOT NULL,
+  nudged_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_nudges_booking ON payment_nudges(booking_kind, booking_id);
 CREATE INDEX IF NOT EXISTS idx_ratings_ratee ON ratings(ratee_id);
 CREATE INDEX IF NOT EXISTS idx_shifts_status_date ON shifts(status, shift_date);
 CREATE INDEX IF NOT EXISTS idx_apps_shift ON applications(shift_id);

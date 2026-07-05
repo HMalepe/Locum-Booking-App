@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function BottomNav({ role, unread, pending }) {
+export default function BottomNav({ role, unread, pending, unpaid }) {
   const pathname = usePathname();
 
   const items = [
@@ -11,6 +11,7 @@ export default function BottomNav({ role, unread, pending }) {
     { href: '/shifts', icon: '📋', label: 'Shifts' },
     { href: '/locums', icon: '👥', label: 'Locums' },
     { href: '/messages', icon: '💬', label: 'Messages', badge: unread },
+    { href: '/payments', icon: '💰', label: 'Payments', badge: role === 'manager' ? unpaid : 0 },
     role === 'locum'
       ? { href: '/schedule', icon: '📅', label: 'Schedule' }
       : { href: '/requests', icon: '📨', label: 'Requests', badge: pending },
