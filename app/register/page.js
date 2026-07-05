@@ -24,8 +24,8 @@ export default function RegisterPage() {
           <label className="field">
             I am a…
             <select name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="locum">Locum (pharmacist / PBA)</option>
-              <option value="manager">Pharmacy manager</option>
+              <option value="locum">Locum (pharmacist / PBA) — I work shifts</option>
+              <option value="manager">Pharmacy side — I book locums</option>
             </select>
           </label>
 
@@ -56,10 +56,21 @@ export default function RegisterPage() {
           )}
 
           {role === 'manager' && (
-            <label className="field">
-              Pharmacy name
-              <input name="pharmacy_name" placeholder="e.g. Dis-Chem Sandton City" required />
-            </label>
+            <>
+              <label className="field">
+                Your position
+                <select name="job_title" defaultValue="pharmacy_manager">
+                  <option value="pharmacy_manager">Pharmacy Manager</option>
+                  <option value="responsible_pharmacist">Responsible Pharmacist</option>
+                  <option value="doctor">Doctor</option>
+                  <option value="owner">Owner</option>
+                </select>
+              </label>
+              <label className="field">
+                Pharmacy / practice name
+                <input name="pharmacy_name" placeholder="e.g. Dis-Chem Sandton City" required />
+              </label>
+            </>
           )}
 
           <div className="row2">

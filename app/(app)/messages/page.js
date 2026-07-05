@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCurrentUser } from '../../../lib/auth';
 import { getConversations } from '../../../lib/queries';
-import { initials, typeLabel } from '../../../lib/format';
+import { initials, typeLabel, jobTitleLabel } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +33,7 @@ export default function MessagesPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  <span className="pill off">{c.role === 'locum' ? typeLabel(c.locum_type) : 'Manager'}</span>
+                  <span className="pill off">{c.role === 'locum' ? typeLabel(c.locum_type) : jobTitleLabel(c.job_title)}</span>
                   {c.unread > 0 && <span className="pill danger">{c.unread} new</span>}
                 </div>
               </div>

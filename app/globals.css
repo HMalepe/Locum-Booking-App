@@ -242,6 +242,28 @@ button.btn:hover, a.btn:hover { background: var(--brand-dark); text-decoration: 
 .composer { display: flex; gap: 0.5rem; position: sticky; bottom: 4.2rem; background: var(--bg); padding: 0.5rem 0; }
 .composer input { flex: 1; }
 
+/* Ratings */
+.star-input { display: flex; align-items: center; gap: 2px; }
+.star-input .star {
+  background: none;
+  border: none;
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #cfd8d5;
+  padding: 0 2px;
+}
+.star-input .star.on { color: #f0a500; }
+.star-input .star-hint { margin-left: 0.5rem; font-size: 0.82rem; color: var(--muted); }
+.stars { color: #f0a500; letter-spacing: 1px; }
+.rating-line { font-size: 0.85rem; color: var(--muted); }
+button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.review { border-top: 1px solid var(--line); padding-top: 0.6rem; margin-top: 0.6rem; }
+.review:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+.review .who { font-weight: 600; font-size: 0.9rem; }
+.review .when { color: var(--muted); font-size: 0.75rem; }
+
 /* Stats */
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
 .stat {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCurrentUser } from '../../../lib/auth';
 import { getOpenShifts, getManagerShifts, getMyApplication } from '../../../lib/queries';
-import { fmtDate, fmtRate, typeLabel } from '../../../lib/format';
+import { fmtDate, fmtRate, typeLabel, starString } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +46,11 @@ export default function ShiftsPage() {
                     <div className="meta">
                       {typeLabel(s.locum_type)} needed · {fmtRate(s.rate)}
                     </div>
+                    {s.manager_rating_count > 0 && (
+                      <div className="rating-line">
+                        <span className="stars">{starString(s.manager_rating)}</span> {s.manager_rating} rated by locums
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
                     {matchesType && <span className="pill">For you</span>}

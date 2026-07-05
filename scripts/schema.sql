@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   company TEXT,
   city TEXT,
   phone TEXT,
+  job_title TEXT,
   bio TEXT DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -75,6 +76,19 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS ratings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  booking_kind TEXT NOT NULL CHECK (booking_kind IN ('shift','request')),
+  booking_id INTEGER NOT NULL,
+  rater_id INTEGER NOT NULL REFERENCES users(id),
+  ratee_id INTEGER NOT NULL REFERENCES users(id),
+  stars INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 5),
+  comment TEXT DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (booking_kind, booking_id, rater_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ratings_ratee ON ratings(ratee_id);
 CREATE INDEX IF NOT EXISTS idx_shifts_status_date ON shifts(status, shift_date);
 CREATE INDEX IF NOT EXISTS idx_apps_shift ON applications(shift_id);
 CREATE INDEX IF NOT EXISTS idx_apps_locum ON applications(locum_id);

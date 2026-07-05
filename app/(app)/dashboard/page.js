@@ -6,9 +6,12 @@ import {
   getManagerShifts,
   getOpenShifts,
   getUnreadCount,
+  getCompletedBookings,
+  getRatingSummary,
 } from '../../../lib/queries';
 import { respondToRequest } from '../../../lib/actions';
-import { fmtDate, fmtRate, typeLabel } from '../../../lib/format';
+import { fmtDate, fmtRate, typeLabel, jobTitleLabel, starString } from '../../../lib/format';
+import RateShifts from '../../../components/RateShifts';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,12 +30,17 @@ export default function Dashboard() {
 function LocumDashboard({ user, upcoming, unread }) {
   const requests = getRequestsForLocum(user.id).filter((r) => r.status === 'pending');
   const openShifts = getOpenShifts().filter((s) => s.locum_type === user.locum_type);
+  const completed = getCompletedBookings(user);
+  const myRating = getRatingSummary(user.id);
 
   return (
     <>
       <h1>Hi, {user.name.split(' ')[0]} 👋</h1>
       <p className="meta" style={{ color: 'var(--muted)', marginTop: 0 }}>
         {typeLabel(user.locum_type)} · {user.city || 'Location not set'}
+        {myRating.count > 0 && (
+          <> · <span className="stars">{starString(myRating.avg)}</span> {myRating.avg} ({myRating.count})</>
+        )}
       </p>
 
       <div className="stat-grid">
@@ -97,6 +105,8 @@ function LocumDashboard({ user, upcoming, unread }) {
           </div>
         ))
       )}
+
+      <RateShifts bookings={completed} viewerRole="locum" />
     </>
   );
 }
@@ -105,11 +115,18 @@ function ManagerDashboard({ user, upcoming, unread }) {
   const myShifts = getManagerShifts(user.id);
   const open = myShifts.filter((s) => s.status === 'open');
   const totalApplications = open.reduce((sum, s) => sum + s.pending_applications, 0);
+  const completed = getCompletedBookings(user);
+  const myRating = getRatingSummary(user.id);
 
   return (
     <>
       <h1>Hi, {user.name.split(' ')[0]} 👋</h1>
-      <p className="meta" style={{ color: 'var(--muted)', marginTop: 0 }}>{user.pharmacy_name}</p>
+      <p className="meta" style={{ color: 'var(--muted)', marginTop: 0 }}>
+        {jobTitleLabel(user.job_title)} · {user.pharmacy_name}
+        {myRating.count > 0 && (
+          <> · <span className="stars">{starString(myRating.avg)}</span> {myRating.avg} ({myRating.count})</>
+        )}
+      </p>
 
       <div className="btn-row" style={{ margin: '0.75rem 0 1rem' }}>
         <Link href="/shifts/new" className="btn">+ Advertise a shift</Link>
@@ -160,6 +177,8 @@ function ManagerDashboard({ user, upcoming, unread }) {
           </div>
         ))
       )}
+
+      <RateShifts bookings={completed} viewerRole="manager" />
     </>
   );
 }

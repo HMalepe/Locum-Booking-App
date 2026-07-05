@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCurrentUser } from '../../../lib/auth';
 import { getLocums } from '../../../lib/queries';
-import { initials, typeLabel } from '../../../lib/format';
+import { initials, typeLabel, starString } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +34,11 @@ export default function LocumsPage() {
                       {l.city ? ` · ${l.city}` : ''}
                       {l.company ? ` · ${l.company}` : ''}
                     </div>
+                    {l.rating_count > 0 && (
+                      <div className="rating-line">
+                        <span className="stars">{starString(l.avg_rating)}</span> {l.avg_rating} ({l.rating_count} review{l.rating_count === 1 ? '' : 's'})
+                      </div>
+                    )}
                   </div>
                 </div>
                 <span className={`pill ${l.days_available > 0 ? 'ok' : 'off'}`}>

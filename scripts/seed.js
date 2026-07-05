@@ -29,16 +29,17 @@ function day(offset) {
 }
 
 const insertUser = db.prepare(`
-  INSERT OR IGNORE INTO users (employee_number, password_hash, name, role, locum_type, pharmacy_name, company, city, phone, bio)
-  VALUES (@employee_number, @password_hash, @name, @role, @locum_type, @pharmacy_name, @company, @city, @phone, @bio)
+  INSERT OR IGNORE INTO users (employee_number, password_hash, name, role, locum_type, job_title, pharmacy_name, company, city, phone, bio)
+  VALUES (@employee_number, @password_hash, @name, @role, @locum_type, @job_title, @pharmacy_name, @company, @city, @phone, @bio)
 `);
 
 const users = [
-  { employee_number: 'MGR-001', name: 'Sarah Naidoo', role: 'manager', locum_type: null, pharmacy_name: 'Dis-Chem Sandton City', company: null, city: 'Sandton', phone: '+27 82 111 2222', bio: '' },
-  { employee_number: 'MGR-002', name: 'David Khumalo', role: 'manager', locum_type: null, pharmacy_name: 'Clicks Rosebank', company: null, city: 'Rosebank', phone: '+27 82 333 4444', bio: '' },
-  { employee_number: 'DC-12345', name: 'John Mthembu', role: 'locum', locum_type: 'pharmacist', pharmacy_name: null, company: 'Freelance', city: 'Johannesburg', phone: '+27 82 555 6666', bio: 'Pharmacist with 8 years retail experience. Punctual, accurate, great with patients.' },
-  { employee_number: 'CLK-67890', name: 'Thandi Nkosi', role: 'locum', locum_type: 'pba', pharmacy_name: null, company: 'Clicks', city: 'Pretoria East', phone: '+27 82 777 8888', bio: 'PBA at Clicks Menlyn, available for weekend locum shifts.' },
-  { employee_number: 'PNP-54321', name: 'Lerato Molefe', role: 'locum', locum_type: 'pharmacist', pharmacy_name: null, company: 'Freelance', city: 'Cape Town', phone: '+27 82 999 0000', bio: 'Freelance pharmacist, flexible weekdays and weekends.' },
+  { employee_number: 'MGR-001', name: 'Sarah Naidoo', role: 'manager', locum_type: null, job_title: 'pharmacy_manager', pharmacy_name: 'Dis-Chem Sandton City', company: null, city: 'Sandton', phone: '+27 82 111 2222', bio: '' },
+  { employee_number: 'MGR-002', name: 'David Khumalo', role: 'manager', locum_type: null, job_title: 'owner', pharmacy_name: 'Clicks Rosebank', company: null, city: 'Rosebank', phone: '+27 82 333 4444', bio: '' },
+  { employee_number: 'DR-001', name: 'Aisha Patel', role: 'manager', locum_type: null, job_title: 'doctor', pharmacy_name: 'Rosebank Family Practice', company: null, city: 'Rosebank', phone: '+27 82 222 3333', bio: '' },
+  { employee_number: 'DC-12345', name: 'John Mthembu', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Johannesburg', phone: '+27 82 555 6666', bio: 'Pharmacist with 8 years retail experience. Punctual, accurate, great with patients.' },
+  { employee_number: 'CLK-67890', name: 'Thandi Nkosi', role: 'locum', locum_type: 'pba', job_title: null, pharmacy_name: null, company: 'Clicks', city: 'Pretoria East', phone: '+27 82 777 8888', bio: 'PBA at Clicks Menlyn, available for weekend locum shifts.' },
+  { employee_number: 'PNP-54321', name: 'Lerato Molefe', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Cape Town', phone: '+27 82 999 0000', bio: 'Freelance pharmacist, flexible weekdays and weekends.' },
 ];
 
 for (const u of users) insertUser.run({ ...u, password_hash: PASSWORD });
@@ -59,6 +60,20 @@ if (db.prepare('SELECT COUNT(*) AS n FROM shifts').get().n === 0) {
   insertShift.run(sarah, 'Dis-Chem Sandton City', 'Sandton', day(2), '09:00', '17:00', 'pharmacist', 250, 'Busy Saturday. Parking at back entrance. Arrive 15 min early for handover.');
   insertShift.run(sarah, 'Dis-Chem Sandton City', 'Sandton', day(5), '08:00', '14:00', 'pba', 130, 'Morning support shift.');
   insertShift.run(david, 'Clicks Rosebank', 'Rosebank', day(3), '10:00', '18:00', 'pharmacist', 240, 'Weekend cover needed. Friendly team.');
+  insertShift.run(byNumber('DR-001'), 'Rosebank Family Practice', 'Rosebank', day(4), '08:30', '13:00', 'pharmacist', 260, 'Dispensing doctor practice — morning cover for our in-house dispensary.');
+
+  // A completed shift in the past with two-way ratings, so the review system has demo data
+  const past = db.prepare(`
+    INSERT INTO shifts (manager_id, pharmacy_name, city, shift_date, start_time, end_time, locum_type, rate, notes, status, assigned_locum_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'filled', ?)
+  `).run(sarah, 'Dis-Chem Sandton City', 'Sandton', day(-5), '09:00', '17:00', 'pharmacist', 250, '', john);
+
+  const rate = db.prepare(`
+    INSERT OR IGNORE INTO ratings (booking_kind, booking_id, rater_id, ratee_id, stars, comment)
+    VALUES ('shift', ?, ?, ?, ?, ?)
+  `);
+  rate.run(past.lastInsertRowid, sarah, john, 5, 'John was excellent — arrived early, handled a busy Saturday with ease. Will book again!');
+  rate.run(past.lastInsertRowid, john, sarah, 4, 'Well-organised pharmacy, friendly team. Got a proper lunch break.');
 }
 
 // Availability for locums (next 14 days, weekdays available for John, weekends for Thandi)
@@ -83,5 +98,5 @@ if (db.prepare('SELECT COUNT(*) AS n FROM messages').get().n === 0) {
 }
 
 console.log('Seed complete. Demo accounts (password: password123):');
-console.log('  Manager: MGR-001 (Sarah, Dis-Chem Sandton) / MGR-002 (David, Clicks Rosebank)');
-console.log('  Locums:  DC-12345 (John, pharmacist) / CLK-67890 (Thandi, PBA) / PNP-54321 (Lerato, pharmacist)');
+console.log('  Pharmacy side: MGR-001 (Sarah, Pharmacy Manager) / MGR-002 (David, Owner) / DR-001 (Aisha, Doctor)');
+console.log('  Locums:        DC-12345 (John, pharmacist) / CLK-67890 (Thandi, PBA) / PNP-54321 (Lerato, pharmacist)');

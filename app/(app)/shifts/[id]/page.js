@@ -9,7 +9,7 @@ import {
   declineApplication,
   closeShift,
 } from '../../../../lib/actions';
-import { fmtDate, fmtRate, typeLabel, initials } from '../../../../lib/format';
+import { fmtDate, fmtRate, typeLabel, initials, starString } from '../../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +31,11 @@ export default function ShiftDetailPage({ params }) {
             <div className="meta">{typeLabel(shift.locum_type)} needed · {fmtRate(shift.rate)}</div>
             {shift.city && <div className="meta">📍 {shift.city}</div>}
             <div className="meta">Posted by {shift.manager_name}</div>
+            {shift.manager_rating_count > 0 && (
+              <div className="rating-line">
+                <span className="stars">{starString(shift.manager_rating)}</span> {shift.manager_rating} · rated by locums after {shift.manager_rating_count} shift{shift.manager_rating_count === 1 ? '' : 's'}
+              </div>
+            )}
           </div>
           <span className={`pill ${shift.status === 'open' ? 'ok' : shift.status === 'filled' ? '' : 'off'}`}>
             {shift.status}

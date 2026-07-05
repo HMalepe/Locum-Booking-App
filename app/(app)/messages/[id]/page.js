@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getCurrentUser } from '../../../../lib/auth';
 import { getUser, getThread } from '../../../../lib/queries';
 import { sendMessage } from '../../../../lib/actions';
-import { initials, typeLabel } from '../../../../lib/format';
+import { initials, typeLabel, jobTitleLabel } from '../../../../lib/format';
 import AutoRefresh from '../../../../components/AutoRefresh';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +27,7 @@ export default function ThreadPage({ params }) {
             {other.role === 'locum' ? <Link href={`/locums/${other.id}`}>{other.name}</Link> : other.name}
           </h3>
           <div className="meta" style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>
-            {other.role === 'locum' ? `${typeLabel(other.locum_type)} · ${other.employee_number}` : `Manager · ${other.pharmacy_name || ''}`}
+            {other.role === 'locum' ? `${typeLabel(other.locum_type)} · ${other.employee_number}` : `${jobTitleLabel(other.job_title)} · ${other.pharmacy_name || ''}`}
           </div>
         </div>
       </div>
