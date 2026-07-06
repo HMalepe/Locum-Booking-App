@@ -13,6 +13,7 @@ The **pharmacy side** (managers, responsible pharmacists, doctors, owners) adver
 - **Two-way ratings & reviews** — after a completed shift, the pharmacy rates the locum and the locum rates the pharmacy (1–5 stars + comment); averages show on locum profiles, the directory, and shift adverts
 - **Payment tracking** — the pharmacy marks worked shifts as **done**, then **paid**; locums see live paid/unpaid status and the amount owed to them
 - **Weekly payment nudges with a cutoff date** — in Settings, the pharmacy sets one cutoff day of the month by which **all** its locums must be paid; every unpaid shift triggers a weekly dashboard reminder until that date, and turns **overdue** (red) after it
+- **Email notifications via Resend** — the weekly payment nudge, new booking requests, accept/decline confirmations, applications, "you've been paid", open-shift broadcasts to matching locums, and a welcome email
 - **Private messaging** — DM any locum or manager, with unread badges and auto-refreshing threads
 - **Dashboards** — locums see booking requests, upcoming shifts, and open shifts matching their type; managers see applications waiting and confirmed bookings
 - **Mobile-first UI** — bottom navigation, designed for phones
@@ -24,6 +25,18 @@ npm install
 npm run seed     # optional: demo data
 npm run dev      # http://localhost:3000
 ```
+
+### Email (Resend)
+
+Copy `.env.example` to `.env.local` and set your Resend key (same setup as ExpiryDesk):
+
+```bash
+RESEND_API_KEY=re_xxxxxxxx
+EMAIL_FROM="Locum Planner <notifications@yourdomain.co.za>"
+APP_URL=https://your-deployed-url
+```
+
+Without a key, emails are logged to the server console instead of sent — local dev needs no setup. Emails go out for: weekly payment nudges (and overdue alerts), booking requests, accept/decline confirmations, shift applications, shift-filled confirmations, "you've been paid", open-shift broadcasts to locums of the matching type, and account welcome.
 
 ### Demo accounts (after `npm run seed`, password `password123`)
 

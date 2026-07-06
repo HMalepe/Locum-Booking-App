@@ -29,17 +29,17 @@ function day(offset) {
 }
 
 const insertUser = db.prepare(`
-  INSERT OR IGNORE INTO users (employee_number, password_hash, name, role, locum_type, job_title, pharmacy_name, company, city, phone, bio)
-  VALUES (@employee_number, @password_hash, @name, @role, @locum_type, @job_title, @pharmacy_name, @company, @city, @phone, @bio)
+  INSERT OR IGNORE INTO users (employee_number, password_hash, name, role, locum_type, job_title, pharmacy_name, company, city, phone, bio, email)
+  VALUES (@employee_number, @password_hash, @name, @role, @locum_type, @job_title, @pharmacy_name, @company, @city, @phone, @bio, @email)
 `);
 
 const users = [
-  { employee_number: 'MGR-001', name: 'Sarah Naidoo', role: 'manager', locum_type: null, job_title: 'pharmacy_manager', pharmacy_name: 'Dis-Chem Sandton City', company: null, city: 'Sandton', phone: '+27 82 111 2222', bio: '' },
-  { employee_number: 'MGR-002', name: 'David Khumalo', role: 'manager', locum_type: null, job_title: 'owner', pharmacy_name: 'Clicks Rosebank', company: null, city: 'Rosebank', phone: '+27 82 333 4444', bio: '' },
-  { employee_number: 'DR-001', name: 'Aisha Patel', role: 'manager', locum_type: null, job_title: 'doctor', pharmacy_name: 'Rosebank Family Practice', company: null, city: 'Rosebank', phone: '+27 82 222 3333', bio: '' },
-  { employee_number: 'DC-12345', name: 'John Mthembu', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Johannesburg', phone: '+27 82 555 6666', bio: 'Pharmacist with 8 years retail experience. Punctual, accurate, great with patients.' },
-  { employee_number: 'CLK-67890', name: 'Thandi Nkosi', role: 'locum', locum_type: 'pba', job_title: null, pharmacy_name: null, company: 'Clicks', city: 'Pretoria East', phone: '+27 82 777 8888', bio: 'PBA at Clicks Menlyn, available for weekend locum shifts.' },
-  { employee_number: 'PNP-54321', name: 'Lerato Molefe', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Cape Town', phone: '+27 82 999 0000', bio: 'Freelance pharmacist, flexible weekdays and weekends.' },
+  { employee_number: 'MGR-001', email: 'sarah@example.com', name: 'Sarah Naidoo', role: 'manager', locum_type: null, job_title: 'pharmacy_manager', pharmacy_name: 'Dis-Chem Sandton City', company: null, city: 'Sandton', phone: '+27 82 111 2222', bio: '' },
+  { employee_number: 'MGR-002', email: 'david@example.com', name: 'David Khumalo', role: 'manager', locum_type: null, job_title: 'owner', pharmacy_name: 'Clicks Rosebank', company: null, city: 'Rosebank', phone: '+27 82 333 4444', bio: '' },
+  { employee_number: 'DR-001', email: 'aisha@example.com', name: 'Aisha Patel', role: 'manager', locum_type: null, job_title: 'doctor', pharmacy_name: 'Rosebank Family Practice', company: null, city: 'Rosebank', phone: '+27 82 222 3333', bio: '' },
+  { employee_number: 'DC-12345', email: 'john@example.com', name: 'John Mthembu', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Johannesburg', phone: '+27 82 555 6666', bio: 'Pharmacist with 8 years retail experience. Punctual, accurate, great with patients.' },
+  { employee_number: 'CLK-67890', email: 'thandi@example.com', name: 'Thandi Nkosi', role: 'locum', locum_type: 'pba', job_title: null, pharmacy_name: null, company: 'Clicks', city: 'Pretoria East', phone: '+27 82 777 8888', bio: 'PBA at Clicks Menlyn, available for weekend locum shifts.' },
+  { employee_number: 'PNP-54321', email: 'lerato@example.com', name: 'Lerato Molefe', role: 'locum', locum_type: 'pharmacist', job_title: null, pharmacy_name: null, company: 'Freelance', city: 'Cape Town', phone: '+27 82 999 0000', bio: 'Freelance pharmacist, flexible weekdays and weekends.' },
 ];
 
 for (const u of users) insertUser.run({ ...u, password_hash: PASSWORD });

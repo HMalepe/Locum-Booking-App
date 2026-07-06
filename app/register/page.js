@@ -39,6 +39,11 @@ export default function RegisterPage() {
             <input name="employee_number" placeholder="e.g. DC-12345" required />
           </label>
 
+          <label className="field">
+            Email (for booking &amp; payment notifications)
+            <input name="email" type="email" placeholder="e.g. you@example.com" />
+          </label>
+
           {role === 'locum' && (
             <>
               <label className="field">

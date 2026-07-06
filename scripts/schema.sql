@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   city TEXT,
   phone TEXT,
   job_title TEXT,
+  email TEXT,
   payment_cutoff_day INTEGER,
   bio TEXT DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
